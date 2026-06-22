@@ -2,3 +2,8 @@
 /README.html
 /recording.log
 /recording.pid
+*.m4a
+*.log
+*.pid
+*.wav
+*.webm
