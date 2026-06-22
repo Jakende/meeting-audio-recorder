@@ -8,3 +8,4 @@
 *.wav
 *.webm
 .DS_Store
+config.env
