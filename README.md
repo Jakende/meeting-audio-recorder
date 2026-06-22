@@ -266,6 +266,30 @@ nano config.env
 BLACKHOLE_DEVICE="My BlackHole" MIC_DEVICE="External Mic" ./scripts/record.sh start-b
 ```
 
+### Terminal User Interface (TUI)
+
+Für die beste Benutzererfahrung steht ein **vollständiges Text-Based User Interface** zur Verfügung:
+
+```bash
+./scripts/tui.sh
+```
+
+**Funktionen:**
+- Hauptmenü mit allen Optionen
+- Aufnahme starten (Variante A oder B)
+- Aufnahme stoppen
+- Aufnahmen verwalten (listen, löschen, umbenennen, abspielen)
+- **Geschwindigkeits-Test & Kalibrierung** - Spezialfunktion zur Lösung von Geschwindigkeitsproblemen
+- Konfiguration ändern
+- Audio-Geräte anzeigen
+- System-Informationen
+
+**Navigation:**
+- Zahlen auswählen für Menüpunkte
+- `h` für Hilfe
+- `q` für Zurück
+- `x` für Beenden
+
 ### Einrichtungsassistent
 
 Für neue Benutzer gibt es einen Einrichtungsassistenten:
@@ -284,6 +308,7 @@ Dieser Assistent führt Sie durch:
 
 | Skript | Beschreibung |
 |--------|--------------|
+| `scripts/tui.sh` | **Terminal User Interface** - Vollständige TUI mit allen Funktionen |
 | `scripts/record.sh` | Hauptskript mit interaktivem Menü und allen Funktionen |
 | `scripts/check.sh` | Systemprüfung und Validierung |
 | `scripts/setup.sh` | Einrichtungsassistent für neue Benutzer |
@@ -341,6 +366,65 @@ Für die Praxis ist diese Kombination am robustesten:
 - Aufnahme B: `BlackHole 2ch` + echtes Mikrofon direkt in `ffmpeg` mischen
 
 Damit bleibt die Konfiguration klar, testbar und ohne unnötig komplexe Aggregate-Device-Abhängigkeiten.
+
+## Geschwindigkeitsfehler - Lösung
+
+Falls Ihre Aufnahmen **zu schnell oder zu langsam** sind, gibt es mehrere Lösungsansätze:
+
+### 1. **ffmpeg Parameter (automatisch in allen Skripten aktiviert)**
+
+Alle Aufnahme-Skripte verwenden jetzt automatisch:
+- `-use_wallclock_as_timestamps 1` - Verwendet Systemzeit als Timestamps
+- `-async 1` - Korrigiert Audio-Sync automatisch
+- `aresample=async=1:first_pts=0` - Resampelt mit Sync-Korrektur
+
+### 2. **Audio-MIDI-Setup korrigieren**
+
+**Falsch:**
+- Clock Source: "Internal Adjustable" ❌
+
+**Richtig:**
+```
+Multi-Output Device "Meeting Output":
+├─ Clock Source: MacBook Pro Speakers (oder das physische Gerät) ✅
+├─ BlackHole 2ch: Drift Correction = AKTIVIERT ✅
+└─ MacBook Pro Speakers: Drift Correction = DEAKTIVIERT ✅
+```
+
+### 3. **Geschwindigkeit testen (über TUI)**
+
+```bash
+./scripts/tui.sh
+# Dann: Menüpunkt 5 "Geschwindigkeit testen & kalibrieren"
+```
+
+Dort können Sie:
+- Testaufnahme erstellen
+- Geschwindigkeit analysieren
+- Sample-Rate anpassen
+
+### 4. **Manueller Test**
+
+```bash
+# 5-Sekunden Testaufnahme
+ffmpeg -f avfoundation -use_wallclock_as_timestamps 1 -i ":BlackHole 2ch" \
+  -t 5 -vn -ar 48000 -ac 2 -async 1 \
+  -c:a pcm_s16le test.wav
+
+# Dauer prüfen
+afinfo test.wav | grep duration
+# Sollte ~5.0 Sekunden sein
+```
+
+### 5. **Alternative: Direkte BlackHole-Aufnahme (ohne Multi-Output)**
+
+Manche Nutzer berichten von besseren Ergebnissen mit:
+```
+Standard-Ausgabe: BlackHole 2ch (nicht Multi-Output)
+Aufnahme: ffmpeg -i ":BlackHole 2ch" ...
+```
+
+--- 
 
 ## Erweiterte Funktionen
 

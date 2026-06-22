@@ -86,7 +86,7 @@ start_variant_a() {
   
   log_info "Starting recording (Variant A): $OUTFILE"
   
-  # Build ffmpeg command
+  # Build ffmpeg command with speed correction
   local cmd=(
     "$FFMPEG_BIN"
     -hide_banner
@@ -97,6 +97,8 @@ start_variant_a() {
     avfoundation
     -thread_queue_size
     512
+    -use_wallclock_as_timestamps
+    1
     -i
     ":$BLACKHOLE_DEVICE"
     -vn
@@ -104,6 +106,8 @@ start_variant_a() {
     "$SAMPLE_RATE"
     -ac
     2
+    -async
+    1
     -c:a
     "$AUDIO_CODEC"
     -b:a
@@ -138,7 +142,7 @@ start_variant_b() {
   
   log_info "Starting recording (Variant B): $OUTFILE"
   
-  # Build ffmpeg command with mixing
+  # Build ffmpeg command with mixing and speed correction
   local cmd=(
     "$FFMPEG_BIN"
     -hide_banner
@@ -149,16 +153,20 @@ start_variant_b() {
     avfoundation
     -thread_queue_size
     512
+    -use_wallclock_as_timestamps
+    1
     -i
     ":$BLACKHOLE_DEVICE"
     -f
     avfoundation
     -thread_queue_size
     512
+    -use_wallclock_as_timestamps
+    1
     -i
     ":$MIC_DEVICE"
     -filter_complex
-    "[0:a][1:a]amix=inputs=2:duration=longest:dropout_transition=2,volume=2[a]"
+    "[0:a]aresample=async=1:first_pts=0[a1];[1:a]aresample=async=1:first_pts=0[a2];[a1][a2]amix=inputs=2:duration=longest:dropout_transition=2,volume=2[a]"
     -map
     "[a]"
     -vn
@@ -166,6 +174,8 @@ start_variant_b() {
     "$SAMPLE_RATE"
     -ac
     2
+    -async
+    1
     -c:a
     "$AUDIO_CODEC"
     -b:a

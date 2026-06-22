@@ -26,8 +26,9 @@ echo "Stoppen mit Ctrl+C oder: ./scripts/record.sh stop"
 save_pid
 
 exec "$FFMPEG_BIN" -hide_banner -nostdin -loglevel warning \
-  -f avfoundation -thread_queue_size 512 -i ":$BLACKHOLE_DEVICE" \
+  -f avfoundation -thread_queue_size 512 -use_wallclock_as_timestamps 1 -i ":$BLACKHOLE_DEVICE" \
   -vn \
   -ar "$SAMPLE_RATE" -ac 2 \
+  -async 1 \
   -c:a "$AUDIO_CODEC" -b:a "$BITRATE" \
   -y "$OUTFILE"
