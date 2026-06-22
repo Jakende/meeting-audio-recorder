@@ -3,7 +3,7 @@
 Robuste CLI-Aufzeichnung von Online-Meetings unter macOS mit `ffmpeg` und BlackHole 2ch.
 
 [![Status](https://img.shields.io/badge/Status-Bereit-grün.svg)](https://github.com/ExistentialAudio/BlackHole)
-[![License](https://img.shields.io/badge/Lizenz-MIT-brightgreen.svg)]()
+[![LICENSE](https://img.shields.io/badge/Lizenz-MIT-brightgreen.svg)]()
 
 Ein einfaches, aber leistungsfähiges Toolset für die Audioaufzeichnung von Online-Meetings (Zoom, Teams, BBB, etc.) mit hoher Qualität und minimaler Konfiguration.
 
