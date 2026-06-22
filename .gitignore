@@ -7,3 +7,4 @@
 *.pid
 *.wav
 *.webm
+.DS_Store
